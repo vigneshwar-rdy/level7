@@ -2,25 +2,27 @@ const express = require("express");
 const app = express();
 const { Todo } = require("./models");
 const bodyParser = require("body-parser");
-const path =require("path")
+const path = require("path");
 app.use(bodyParser.json());
 
-app.set("view engine","ejs");
+app.set("view engine", "ejs");
 
-app.get("/", async (request,response) => {
+app.use(express.static(path.join(__dirname, "public")));
+
+app.get("/", async (request, response) => {
   const allTodos = await Todo.getTodos();
-  if(request.accepts("html")){
-    response.render('index', {
-      allTodos
+  if (request.accepts("html")) {
+    response.render("index", { 
+      allTodos 
     });
   } else {
-    response.json({
-      allTodos
-    });
+    response.json({ allTodos });
   }
 });
 
-app.use(express.static(path.join(__dirname,'public')));
+app.get("/", function (request, response) {
+  response.send("Hello World");
+});
 
 
 app.get("/todos", async function (_request, response) {
@@ -31,11 +33,11 @@ app.get("/todos", async function (_request, response) {
   // Then, we have to respond with all Todos, like:
   // response.send(todos)
   try {
-    const todos = await Todo.getTodos();
-    return response.json(todos);
+    const todos = await Todo.findAll();
+    return response.send(todos);
   } catch (error) {
     console.log(error);
-    return response.status(422).json(error);
+    return response.status(422).send(error);
   }
 });
 
